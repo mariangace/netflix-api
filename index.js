@@ -57,7 +57,8 @@ app.post('/login', (req, res) => {
     User.findOne({ email, password }, (err, user) => {
         if(user){
             res.status(200).send({
-                status: "valid"
+                status: "valid",
+                token: user.id
             }) 
         }else{
            
