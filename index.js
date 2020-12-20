@@ -40,14 +40,21 @@ app.post('/register', (req, res) => {
         password: req.body.password
     })
     newUser.save((err, user)=>{
-        console.log("all is user")
-        console.log(user)
+        //
         if(err){
             res.status(400).send({
                 status: err
             })
+        }else{
+            console.log("all is good")
+            console.log(user)
+            //res.status(200).send("registered");
+            res.status(200).send({
+                status: "registered",
+                token: user.id
+            }) 
         }
-        res.status(200).send("registered");
+        
     })
 })
 
