@@ -2,10 +2,12 @@ const express = require('express')
 const app = express()
 const port = 3000
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 const { Schema } = mongoose; //Grab the schema from mongoose
 var cors = require('cors');
-require('dotenv').config()
+require('dotenv').config();
 
+const secreteToken = "d0d9fkdsldld";
 
 mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.kvegb.mongodb.net/netflix-api-db-dev?retryWrites=true&w=majority`, 
 { useCreateIndex: true, 
@@ -29,9 +31,43 @@ app.use((req,res,next)=>{
 
 app.use(express.json());
 
+/**
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * For now, our beautiful middleware :) 
+ */
+function authenticateToken(req,res,next){
+    const authHeaderToken = req.headers['authorization']
+    if(!authHeaderToken){
+        return res.sendStatus(401)
+    }
+    jwt.verify(authHeaderToken, secreteToken, (err,user)=> {
+        if(err){
+            return res.sendStatus(403);
+        }
+        //console.log(user)
+        next();
+    })
+}
+
 app.get('/', (req, res) => {
   res.send('Hello World Mar!')
 })
+
+app.get('/whislist', authenticateToken, (req, res) => {
+    res.send({
+        //then we can get the wishlist based in user
+        items:[
+            "Budapest",
+            "Advengers",
+            "Tenet",
+            "Queens Gambit"
+        ]
+    })
+  })
+  
 
 app.post('/register', (req, res) => {
     const newUser = new User({
@@ -58,14 +94,25 @@ app.post('/register', (req, res) => {
     })
 })
 
+function generateAccessToken (user){
+    const payload = {
+        id:user.id,
+        name:user.name
+    }
+    return jwt.sign(payload, "d0d9fkdsldld", { expiresIn: '7200s'});
+}
+
 app.post('/login', (req, res) => {
     const { password, email}  = req.body; 
     console.log(req.body)
     User.findOne({ email, password }, (err, user) => {
         if(user){
+            console.log(user);
+            const token = generateAccessToken(user);
+            console.log(token);
             res.status(200).send({
                 status: "valid",
-                token: user.id
+                token: token
             }) 
         }else{
            
