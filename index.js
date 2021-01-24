@@ -8,7 +8,7 @@ require('dotenv').config();
 
 const secreteToken = "d0d9fkdsldld";
 
-mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.kvegb.mongodb.net/netflix-api-db-dev?retryWrites=true&w=majority`, 
+mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.kvegb.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`, 
 { useCreateIndex: true, 
   useUnifiedTopology: true, 
   useNewUrlParser: true});
